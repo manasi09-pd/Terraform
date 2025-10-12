@@ -29,19 +29,3 @@ AWS IAM, VPC, EC2, S3, etc.
 Kubernetes (kubectl, Helm)
 
 YAML, HCL
-
-📁 Project Structure
-.
-├── .github/workflows/     # CI/CD pipelines using GitHub Actions
-├── modules/               # Terraform modules for reusable infrastructure
-│   ├── eks/
-│   ├── vpc/
-│   └── iam/
-├── environments/
-│   ├── dev/
-│   └── prod/
-├── terraform.tfvars       # Environment-specific variables
-├── main.tf                # Main Terraform configuration
-├── variables.tf           # Input variables
-├── outputs.tf             # Output values
-└── README.md              # Project documentation
