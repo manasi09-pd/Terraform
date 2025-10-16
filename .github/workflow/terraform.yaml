@@ -57,7 +57,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: .
+        working-directory: Terraform/
 
     steps:
       - name: Checkout
