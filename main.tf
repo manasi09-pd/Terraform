@@ -27,20 +27,20 @@ module "vpc" {
 }
 
 module "iam" {
-  source    = "./modules/iam"
-  iam_user  = var.iam_user
+  source   = "./modules/iam"
+  iam_user = var.iam_user
 }
 
 module "eks" {
-  source            = "./modules/eks"
-  cluster_name      = var.cluster_name
-  cluster_version   = var.cluster_version
-  vpc_id            = module.vpc.vpc_id
-  subnet_ids        = module.vpc.public_subnet_ids
+  source                      = "./modules/eks"
+  cluster_name                = var.cluster_name
+  cluster_version             = var.cluster_version
+  vpc_id                      = module.vpc.vpc_id
+  subnet_ids                  = module.vpc.public_subnet_ids
   node_group_desired_capacity = var.node_group_desired_capacity
   node_group_max_capacity     = var.node_group_max_capacity
   node_group_min_capacity     = var.node_group_min_capacity
-  iam_user                   = module.iam.iam_user_name
+  iam_user                    = module.iam.iam_user_name
 }
 
 
