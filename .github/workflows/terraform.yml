@@ -42,24 +42,14 @@
 #       with:
 #         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-name: 'EKS-Creation-Using-Terraform'
+name: 'Terraform - EKS Infra Deploy'
 
 on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
-    inputs:
-      tfvars_file:
-        description: 'Path to the .tfvars file'
-        required: true
-        default: 'dev.tfvars'
-      action:
-        type: choice
-        description: 'Terraform Action'
-        options:
-          - plan
-          - apply
-          - destroy
-        required: true
-        default: 'apply'
 
 env:
   AWS_REGION: us-east-1
@@ -71,17 +61,15 @@ permissions:
 
 jobs:
   terraform:
-    name: Terraform ${{ github.event.inputs.action }}
+    name: Terraform Workflow
     runs-on: ubuntu-latest
-    environment: production
-
     defaults:
       run:
         shell: bash
-        working-directory: eks
+        working-directory: .  # Root folder where main.tf exists
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Terraform
@@ -89,37 +77,18 @@ jobs:
         with:
           terraform_version: 1.9.3
 
-      # Optional: Enable caching to speed up init
-      - name: Cache Terraform
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.terraform.d/plugin-cache
-            .terraform
-          key: ${{ runner.os }}-terraform-${{ hashFiles('**/*.tf') }}
-          restore-keys: |
-            ${{ runner.os }}-terraform-
-
       - name: Terraform Init
         run: terraform init
 
       - name: Terraform Format Check
-        run: terraform fmt -check -diff
+        run: terraform fmt -check -recursive
 
       - name: Terraform Validate
         run: terraform validate
 
       - name: Terraform Plan
-        if: ${{ github.event.inputs.action == 'plan' }}
-        run: |
-          terraform plan -var-file=${{ github.event.inputs.tfvars_file }} -input=false
+        run: terraform plan -input=false
 
-      - name: Terraform Apply
-        if: ${{ github.event.inputs.action == 'apply' }}
-        run: |
-          terraform apply -auto-approve -var-file=${{ github.event.inputs.tfvars_file }} -input=false
-
-      - name: Terraform Destroy
-        if: ${{ github.event.inputs.action == 'destroy' }}
-        run: |
-          terraform destroy -auto-approve -var-file=${{ github.event.inputs.tfvars_file }} -input=false
+      - name: Terraform Apply (on push to main only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
