@@ -42,59 +42,56 @@
 #       with:
 #         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-name: 'Terraform - EKS Cluster Deployment'
+name: 'Terraform - EKS Cluster'
 
 on:
   push:
-    branches:
-      - "k8s-karpenter"
+    branches: [ "k8s-karpenter" ]
   pull_request:
-    branches:
-      - "k8s-karpenter"
-
-permissions:
-  contents: read
-  id-token: write # Required for OIDC authentication if using IAM roles (optional)
+    branches: [ "k8s-karpenter" ]
 
 jobs:
   terraform:
-    name: 'Terraform Workflow'
     runs-on: ubuntu-latest
 
     defaults:
       run:
         shell: bash
-        working-directory: .  # ✅ Adjust if your Terraform code lives elsewhere
+        working-directory: .
 
     steps:
-      - name: 🛎️ Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: k8s-karpenter
 
-      - name: ☁️ Configure AWS credentials
+      - name: List repo files
+        run: |
+          pwd
+          ls -la
+          ls -la modules/
+
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: 🛠️ Set up Terraform
-        uses: hashicorp/setup-terraform@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: 1.5.0
-          terraform_wrapper: false
 
-      - name: 🧪 Terraform Init
+      - name: Terraform Init
         run: terraform init
 
-      - name: 🧹 Terraform Format Check
-        run: terraform fmt -check -recursive
+      - name: Terraform Format
+        run: terraform fmt -check
 
-      - name: 📝 Terraform Validate
-        run: terraform validate
+      - name: Terraform Plan
+        run: terraform plan -input=false
 
-      - name: 🔍 Terraform Plan
-        run: terraform plan -input=false -out=tfplan
-
-      - name: 🚀 Terraform Apply
+      - name: Terraform Apply
         if: github.ref == 'refs/heads/k8s-karpenter' && github.event_name == 'push'
-        run: terraform apply -auto-approve tfplan
+        run: terraform apply -auto-approve -input=false
