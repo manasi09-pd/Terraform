@@ -64,7 +64,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: ./  # ✅ Adjust if your Terraform code lives elsewhere
+        working-directory: .  # ✅ Adjust if your Terraform code lives elsewhere
 
     steps:
       - name: 🛎️ Checkout code
