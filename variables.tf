@@ -38,12 +38,12 @@ variable "cluster_version" {
 
 variable "node_group_desired_capacity" {
   description = "EKS node group desired capacity"
-  default     = 1
+  default     = 2
 }
 
 variable "node_group_max_capacity" {
   description = "EKS node group max capacity"
-  default     = 2
+  default     = 3
 }
 
 variable "node_group_min_capacity" {
