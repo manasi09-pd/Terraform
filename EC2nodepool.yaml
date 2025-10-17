@@ -1,0 +1,20 @@
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: Provisioner
+metadata:
+  name: default
+spec:
+  requirements:
+    - key: "karpenter.k8s.aws/instance-type"
+      operator: In
+      values: ["m5.large", "m5.xlarge"]  # instance types you want Karpenter to pick from
+    - key: "kubernetes.io/arch"
+      operator: In
+      values: ["amd64"]
+  provider:
+    subnetSelector:
+      karpenter.sh/discovery: my-eks-cluster
+    securityGroupSelector:
+      karpenter.sh/discovery: my-eks-cluster
+    iam:
+      instanceProfile: "KarpenterNodeInstanceProfile-my-eks-cluster"
+  ttlSecondsAfterEmpty: 30
