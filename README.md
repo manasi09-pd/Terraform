@@ -16,16 +16,32 @@ Production-Ready Config: Modular structure, state management, secrets handling, 
 
 Serverless + AWS Native Services: (Optional) Integrate serverless components and AWS-native services where applicable.
 
-🛠️ Tech Stack
 
-Amazon EKS
+# EKS Cluster Autoscaling with Karpenter
 
-Terraform
+This repository demonstrates how to configure **Karpenter** for automatic node scaling in an AWS EKS cluster using a custom Amazon Linux 2 AMI.
 
-GitHub Actions
+---
 
-AWS IAM, VPC, EC2, S3, etc.
+## Tools Used
+- **Amazon EKS** (Managed Kubernetes service)
+- **Karpenter** (Kubernetes autoscaler by AWS)
+- **AWS CLI** (for managing EC2 resources)
+- **kubectl** (Kubernetes CLI)
+- **Helm** (Helmchart for karpenter)
 
-Kubernetes (kubectl, Helm)
+---
 
-YAML, HCL
+## Overview
+
+Karpenter dynamically provisions EC2 instances based on Kubernetes workload demands. This setup uses a custom EC2NodeClass with a specific AMI tagged for Karpenter discovery and configures subnets, security groups, and IAM roles for proper node lifecycle management.
+
+---
+
+## Steps & Commands
+
+### Tag your custom AMI
+
+```bash
+aws ec2 create-tags --resources ami-01efa11609c91a643 --tags Key=karpenter-ami,Value=true
+
