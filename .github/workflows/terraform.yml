@@ -45,11 +45,12 @@
 name: 'Terraform - EKS Infra Deploy'
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Choose terraform action (apply or destroy)'
+        required: true
+        default: 'apply'
 
 env:
   AWS_REGION: us-east-1
@@ -61,12 +62,11 @@ permissions:
 
 jobs:
   terraform:
-    name: Terraform Workflow
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
-        working-directory: .  # Root folder where main.tf exists
+        working-directory: .
 
     steps:
       - name: Checkout Code
@@ -89,6 +89,11 @@ jobs:
       - name: Terraform Plan
         run: terraform plan -input=false
 
-      - name: Terraform Apply (on push to main only)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+      - name: Terraform Apply or Destroy
+        run: |
+          if [[ "${{ github.event.inputs.action }}" == "destroy" ]]; then
+            terraform destroy -auto-approve
+          else
+            terraform apply -auto-approve -input=false
+          fi
+
