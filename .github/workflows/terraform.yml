@@ -42,56 +42,57 @@
 #       with:
 #         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-name: 'Terraform - EKS Cluster'
+name: 'Terraform - EKS Infra Deploy'
 
 on:
-  push:
-    branches: [ "k8s-karpenter" ]
-  pull_request:
-    branches: [ "k8s-karpenter" ]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Choose terraform action (apply or destroy)'
+        required: true
+        default: 'apply'
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+permissions:
+  contents: read
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
-
     defaults:
       run:
         shell: bash
-        working-directory: Terraform/
+        working-directory: .
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          ref: k8s-karpenter
-
-      - name: List repo files
-        run: |
-          pwd
-          ls -la
-          ls -la modules/
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: 1.5.0
+          terraform_version: 1.9.3
 
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Format
-        run: terraform fmt -check
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        run: terraform validate
 
       - name: Terraform Plan
         run: terraform plan -input=false
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/k8s-karpenter' && github.event_name == 'push'
-        run: terraform apply -auto-approve -input=false
+      - name: Terraform Apply or Destroy stage
+        run: |
+          if [[ "${{ github.event.inputs.action }}" == "apply" ]]; then 
+            terraform apply -auto-approve -input=false
+          else
+            terraform destroy -auto-approve 
+          fi

@@ -32,18 +32,18 @@ variable "cluster_name" {
 
 variable "cluster_version" {
   description = "Kubernetes version for EKS cluster"
-  type = string
+  type        = string
   default     = "1.28"
 }
 
 variable "node_group_desired_capacity" {
   description = "EKS node group desired capacity"
-  default     = 1
+  default     = 2
 }
 
 variable "node_group_max_capacity" {
   description = "EKS node group max capacity"
-  default     = 2
+  default     = 3
 }
 
 variable "node_group_min_capacity" {
@@ -53,13 +53,13 @@ variable "node_group_min_capacity" {
 
 variable "name" {
   description = "Name prefix for VPC and related resources"
-  default     = "eks-project" 
+  default     = "eks-project"
 }
 
 variable "availability_zones" {
   description = "List of availability zones to deploy resources in"
   type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]  
+  default     = ["us-east-1a", "us-east-1b"]
 }
 
 
